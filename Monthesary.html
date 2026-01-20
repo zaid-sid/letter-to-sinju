@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Letter For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary-pink: #ffb6c1;
+            --dark-pink: #e75480;
+            --bg-color: #fff0f5;
+            --paper-color: #fffdf8;
+            --text-color: #5a3a3a;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Patrick Hand', cursive;
+            background-color: var(--bg-color);
+            /* OPTIONAL: Add a floral background image here */
+            background-image: url('https://www.transparenttextures.com/patterns/mocha-grunge.png'); /* Placeholder texture */
+            overflow: hidden; /* Prevent scrolling on the main body */
+        }
+
+        /* --- THE ENVELOPE SECTION --- */
+        #envelope-stage {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            perspective: 1000px;
+            transition: opacity 1s ease;
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            cursor: pointer;
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .envelope .lid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100px; /* Half height */
+            background-color: var(--dark-pink);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transform-origin: top;
+            transition: transform 0.8s ease-in-out 0.4s; /* Delay opening until rising starts */
+            z-index: 4;
+            border-top: 2px solid #d64d77;
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            background-color: #c92a2a;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: gold;
+            font-size: 24px;
+            border: 4px double #a01e1e;
+        }
+
+        .envelope .pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background-color: var(--primary-pink);
+            clip-path: polygon(0 100%, 100% 100%, 100% 0, 50% 80%, 0 0);
+            z-index: 3;
+            border-bottom: 2px solid #d64d77;
+        }
+        
+        .envelope .back {
+             position: absolute;
+             bottom: 0;
+             width: 100%;
+             height: 100%;
+             background-color: #eea5b0;
+             z-index: 1;
+        }
+
+        .letter-preview {
+            position: absolute;
+            top: 10px;
+            left: 5%;
+            width: 90%;
+            height: 180px;
+            background-color: var(--paper-color);
+            border-radius: 5px;
+            z-index: 2;
+            padding: 15px;
+            box-sizing: border-box;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            transition: transform 1s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .letter-preview h2 {
+            margin: 0;
+            color: var(--dark-pink);
+            font-family: 'Indie Flower', cursive;
+        }
+
+        /* Animation States */
+        .envelope-wrapper.open .lid {
+            transform: rotateX(180deg);
+        }
+
+        .envelope-wrapper.open .letter-preview {
+            transform: translateY(-200px);
+            z-index: 6; /* Bring on top of everything once it exits */
+        }
+
+
+        /* --- THE MAIN CONTENT SLIDESHOW --- */
+        #main-content {
+            display: none; /* Hidden initially */
+            height: 100vh;
+            width: 100vw;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .slide {
+            display: none; /* Hide slides by default */
+            background-color: var(--paper-color);
+            width: 90%;
+            max-width: 450px;
+            height: 80vh;
+            max-height: 700px;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(189, 130, 130, 0.3);
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 3px dashed var(--primary-pink);
+            overflow-y: auto; /* Allow scrolling inside the card */
+            position: relative;
+        }
+
+        .slide.active {
+            display: flex; /* Only show the active one */
+             animation: fadeUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        /* Slide Styling Specifics */
+        h1 { font-family: 'Indie Flower', cursive; color: var(--dark-pink); font-size: 2.5rem; margin-bottom: 10px;}
+        p { font-size: 1.2rem; line-height: 1.5; color: var(--text-color);}
+        
+        .photo-frame {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 8px solid var(--primary-pink);
+            overflow: hidden;
+            margin: 20px auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
+
+        .scrolling-letter-container {
+            width: 100%;
+            text-align: left;
+            padding: 15px;
+            background-image: linear-gradient(transparent, transparent 29px, var(--primary-pink) 29px);
+            background-size: 100% 30px;
+            line-height: 30px !important;
+        }
+        .scrolling-letter-container p { line-height: 30px; margin: 0;}
+
+        .qr-code-img { width: 180px; height: 180px; margin: 20px; border: 3px dashed var(--dark-pink); padding: 5px;}
+
+        /* Buttons */
+        .btn {
+            background-color: var(--dark-pink);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-family: 'Patrick Hand', cursive;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px #9e3757;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: translateY(4px); box-shadow: 0 0px #9e3757;}
+        
+        /* Floating Hearts Decoration */
+        .floating-heart { position: absolute; color: var(--dark-pink); opacity: 0.5; z-index: 0;}
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="your-music.mp3" type="audio/mpeg">
+    </audio>
+
+
+    <div id="envelope-stage">
+        <div class="envelope-wrapper" onclick="openEnvelope()">
+            <div class="envelope">
+                <div class="back"></div>
+                <div class="letter-preview">
+                    <h2>A Letter For Her.</h2>
+                    <p>(Tap to open)</p>
+                    <div style="font-size: 30px; margin-top: 20px;">💌</div>
+                </div>
+                <div class="pocket"></div>
+                <div class="lid">
+                    <div class="wax-seal">❤</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="main-content">
+        <div class="slide active" id="slide1">
+            <div class="floating-heart" style="top: 10%; left: 5%; font-size: 30px;">❤</div>
+            <div class="floating-heart" style="bottom: 20%; right: 10%; font-size: 40px;">❤</div>
+            
+            <h1>Happy Monthsary Baby!</h1>
+            <div class="photo-frame">
+                <a href="https://ibb.co/gLvYyRzD"><img src="https://i.ibb.co/S4QSN3RK/IMG-0910.jpg" alt="IMG-0910" border="0"></a>            </div>
+            <p>"I am so grateful to be able to call you mine."</p>
+            <button class="btn" onclick="nextSlide(2)">Read Letter ▶</button>
+        </div>
+
+        <div class="slide" id="slide2">
+             <h1>My Letter To You</h1>
+             <div class="scrolling-letter-container">
+                <p>My booboo,</p>
+                <p>Thinking back to when we first met, I never imagined you would become my entire world. Watching you smile is the highlight of my day.</p>
+                <p>You have a heart too good for this world, and I promise to protect it forever. I love how passionate you are about everything you do.</p>
+                <p>Even in my wildest dreams, I never thought someone like you existed. If there was such a thing as perfection, it would definitely be you.</p>
+                <p>I am so proud of you and I know we will shine brightly as we live the rest of our lives together.</p>
+                <p>I heart you, Always & Forever.</p>
+                <br>
+                <p>- your doodoo</p>
+             </div>
+             <button class="btn" onclick="nextSlide(3)">One last surprise ▶</button>
+        </div>
+
+        <div class="slide" id="slide3">
+            <h1>Guess the song challenge!</h1>
+            <p style="color: var(--dark-pink);">Hint: "it's our movie and not your most favourite"</p>
+            
+            <div id="quiz-container" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <input type="text" id="song-guess" placeholder="Type the song name..." 
+                       style="padding: 12px; border-radius: 10px; border: 2px solid var(--primary-pink); font-family: inherit; width: 70%; text-align: center; font-size: 1.1rem; outline: none;">
+                
+                <button class="btn" onclick="checkAnswer()">Submit Answer</button>
+                
+                <p id="error-msg" style="color: red; display: none; font-size: 1rem; margin-top: 10px;">
+                    Incorrect! Try again baby. ❤️
+                </p>
+            </div>
+
+            <div id="success-container" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                <p style="font-size: 1.5rem; margin-bottom: 10px;">You got it! 🎶</p>
+                
+                <iframe data-testid="embed-iframe" style="border-radius:12px" src="https://open.spotify.com/embed/track/6G8vN5EUtcDxOXOXadF6kp?utm_source=generator" width="100%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>                <button class="btn" onclick="nextSlide(1)">Replay ↺</button>
+            </div>
+       </div>
+    </div>
+
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 3;
+        const music = document.getElementById('bg-music');
+        // Set volume lower so it's background music
+        music.volume = 0.4; 
+
+        function openEnvelope() {
+            // 1. Play Music on first click
+            music.play().catch(error => {
+                console.log("Autoplay prevented by browser, waiting for interaction.");
+            });;
+
+            const wrapper = document.querySelector('.envelope-wrapper');
+            wrapper.classList.add('open');
+
+            // 2. Wait for animation to finish (approx 1.5 seconds), then switch views
+            setTimeout(() => {
+                document.getElementById('envelope-stage').style.opacity = '0';
+                
+                // Wait for fade out, then hide display entirely and show content
+                setTimeout(() => {
+                    document.getElementById('envelope-stage').style.display = 'none';
+                    const mainContent = document.getElementById('main-content');
+                    mainContent.style.display = 'flex';
+                    // Trigger fade in
+                    setTimeout(() => {mainContent.style.opacity = '1';}, 50);
+                }, 1000);
+
+            }, 1500);
+        }
+
+        function nextSlide(slideNumber) {
+            // Hide all slides
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+
+            // Show targeted slide
+            document.getElementById('slide' + slideNumber).classList.add('active');
+            currentSlide = slideNumber;
+        }
+        function checkAnswer() {
+            const input = document.getElementById('song-guess');
+            const answer = input.value.toLowerCase().trim(); // converts 'Tum Ho To' to 'tum ho to'
+            const errorMsg = document.getElementById('error-msg');
+
+            // The correct answer string
+            if (answer === "tum ho toh") {
+                // Hide quiz, show music
+                document.getElementById('quiz-container').style.display = 'none';
+                document.getElementById('success-container').style.display = 'flex';
+            } else {
+                // Show error
+                errorMsg.style.display = 'block';
+                input.style.border = "2px solid red";
+                // Shake animation effect (optional)
+                input.style.transform = "translateX(5px)";
+                setTimeout(() => input.style.transform = "translateX(0)", 100);
+            }
+        }
+    </script>
+</body>
+</html>
